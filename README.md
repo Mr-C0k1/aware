@@ -6,140 +6,129 @@ git clone https://github.com/Mr-C0k1/aware.git
 cd aware
 python3 aware.py 
 
-🔐 Suware.py — Website & System Ransomware Detector + Attacker Tracer
-🎯 Deskripsi Umum
-suware.py adalah sebuah Python-based security tool yang dirancang untuk:
-Mendeteksi ransomware (Encrypting, Locker, MBR, Mobile, Scareware) secara lokal pada sistem atau direktori website.
-Melacak IP penyerang dari ransom note, file log (web server), atau koneksi aktif.
-Memberikan laporan terstruktur dalam format JSON untuk keperluan forensik dan dokumentasi.
+✅ Kegunaan dan Fungsi utama aware.py:
+🔎 1. Website Threat Scanner (Scan URL)
+Melakukan pemindaian halaman website terhadap indikasi ancaman malware atau ransomware (seperti Akira ransomware).
+Deteksi berbasis pola (regex) terhadap skrip mencurigakan seperti:
+Script encrypt.php (indikasi ransomware)
+Obfuscated script injection
+Akira ransomware note (akira_readme.txt)
+Dapat mengekstrak kemungkinan kunci enkripsi dari source code (PHP/JS) pada halaman yang dipindai.
 
-⚙️ Fungsi Utama
-Fitur	Penjelasan
-🔍 Pemindaian File/Folder	Mendeteksi file yang dienkripsi oleh ransomware (misal .akira, .lockbit, .deadbolt, dll).
-📄 Pendeteksian Ransom Note	Mengidentifikasi file seperti readme.txt, akira_readme.txt dan mengekstrak IP jika ditemukan.
-💾 MBR Scanner	Membaca sektor boot awal (MBR) untuk indikasi ransomware bootloader.
-🧠 IP Tracing	Menganalisis file log (misalnya access.log) dan menghitung kemunculan IP untuk melacak asal serangan.
-📑 Laporan Otomatis	Output laporan hasil dalam format .json dengan waktu scan.
+🛡️ 2. Remote Server Scanner (via SSH)
+Melakukan scan file di server Linux melalui koneksi SSH menggunakan RSA key.
+Mengecek isi file (PHP, JS) untuk menemukan:
+Pola file mencurigakan
+Kemungkinan kunci enkripsi disisipkan oleh malware
 
-💻 Contoh Penggunaan
-# 1. Deteksi ransomware encrypting saja:
-python3 suware.py --scan /var/www/html --type encrypting
-# 2. Deteksi semua tipe ransomware & lacak IP dari log:
-python3 suware.py --scan /home/web --type all --trace --log /var/log/apache2/access.log
+🧪 3. Integrasi VirusTotal dan Dashboard (potensial)
+Dalam .env terdapat pengaturan VT_API_KEY dan REPORT_DASHBOARD yang bisa dikembangkan untuk:
+Melaporkan hasil scan ke dashboard internal
+Melakukan verifikasi hash ke VirusTotal (belum diaktifkan dalam versi ini)
+🖼️ 4. ASCII Logo + Logging
+Menampilkan logo dalam bentuk ASCII art dari gambar antiware_logo.png.
+Menyimpan hasil scan dan error ke dalam file antiware_scanner.log.
 
-# 3. Deteksi manipulasi bootloader (MBR ransomware):
-sudo python3 suware.py --scan / --type mbr
-🧪 Ransomware yang Didukung
-Tipe Ransomware	Metode Deteksi
-Encrypting Ransomware	File extension dan ransom note
-Locker Ransomware	(Akan dikembangkan via process watcher)
-MBR Ransomware	Signature sektor boot pada /dev/sda
-Scareware	Deteksi keyword dan proses (rencana pengembangan)
-Mobile Ransomware	(Untuk Android: butuh modul terpisah - tidak dibahas dalam suware.py)
+⚙️ Cara Penggunaan:
+🔸 Scan Website:
+python3 aware.py https://example.com --extract-key
+🔸 Scan Server Remote (SSH):
+python3 aware.py --ssh root@192.168.1.10 --key ~/.ssh/id_rsa --remote-path /var/www/html
+📁 Output:
+Disimpan dalam folder antiware_reports/
+Log aktivitas di antiware_scanner.log
+Format hasil dalam JSON (mudah digunakan untuk integrasi lebih lanjut)
 
-📁 Output Laporan
-Disimpan dalam folder antiware_logs/
+✅ Kegunaan dan Fungsi dorware.py
+🎯 1. Deteksi Berbagai Jenis Ransomware
+Tool ini mampu mendeteksi 5 jenis ransomware utama:
 
-Format file:
-pgsql
-report_2025-07-15_08_30_15.json
-Isi laporan:
-json
-{
-  "time": "2025-07-15T08:30:15",
-  "detections": ["/var/www/html/akira_readme.txt", "..."],
-  "ip_trace": ["192.123.1.10", "123.111.24.7"] ( alamat palsu )
-}
-🛡️ Kelebihan suware.py
-✅ Mudah digunakan hanya lewat 1 baris perintah
-✅ Dapat dijalankan di Linux Server, Termux, Kali Linux, dan VPS
-✅ Cocok untuk sysadmin, peneliti keamanan, dan bug hunter
-✅ Tidak membutuhkan instalasi library berat
-✅ Dapat diintegrasikan dengan skrip forensik, SIEM, atau dashboard keamanan
+Jenis Ransomware	Cara Deteksi	Keterangan
+🔐 Encrypting	Mendeteksi ekstensi file terenkripsi seperti .akira, .lockbit, dan ransom note seperti readme.txt	
+🪟 Locker	(Belum diimplementasikan penuh, tapi dirancang untuk proses lockscreen dan sejenisnya)	
+🧱 MBR (Master Boot Record)	Mengecek apakah sektor MBR (/dev/sda) dimodifikasi, khas dari MBR Ransomware seperti Petya	
+📱 Mobile	Dapat ditambah nantinya, belum diimplementasikan	
+😱 Scareware	Dideteksi dari ransom note atau pola teks manipulatif pada log	
 
-📌 Tujuan Script aware.py
-Skrip ini adalah tool utama dari proyek AWARE untuk memindai situs web atau direktori lokal dari indikasi ransomware.
-🎯 Fitur utama:
-🔎 Memindai target (URL atau direktori).
-🤖 Menjalankan scanner berbasis Python, C++, dan Golang jika tersedia.
-📁 Menyimpan hasil ke dalam file log (aware_reports/scan_*.log).
-📦 Siap dipaketkan sebagai executable tool seperti di Kali Linux.
-🔍 Penjelasan Per Baris:
-Baris 1–6:
-python
-#!/usr/bin/env python3
-"""
-AWARE - All-in-One Website Ransomware Scanner & Attacker Tracer
-Versi terbaru dengan integrasi C++, Golang, dan Python untuk deteksi enkripsi tersembunyi.
-"""
-Shebang: Agar file dapat dieksekusi langsung (chmod +x aware.py && ./aware.py).
-Docstring: Penjelasan singkat alat.
-Baris 8–11:
-python
-import argparse
-import os
-import subprocess
-from datetime import datetime
-Mengimpor modul Python standar yang digunakan untuk:
-parsing argumen CLI
-menjalankan proses eksternal (subprocess)
-membuat timestamp
-membuat folder, dll.
-Baris 13–14:
-python
-AWARE_REPORT_DIR = "aware_reports"
-os.makedirs(AWARE_REPORT_DIR, exist_ok=True)
-Membuat folder aware_reports untuk menyimpan log hasil scan.
-Jika folder sudah ada, tidak error (exist_ok=True).
-def log(message):
-    print(f"[AWARE] {message}")
-Fungsi helper untuk mencetak pesan dengan prefix [AWARE].
-Fungsi scan_target():
-Ini fungsi utama untuk pemindaian.
-def scan_target(target):
-    ...
-Menerima parameter target, bisa URL atau path lokal.
-Di dalamnya:
-Membuat log awal pemindaian.
-Membuat file log hasil scan.
-Menulis placeholder pemindaian Python.
-Jika ada file cpp_scanner, jalankan (gunakan subprocess).
-Jika ada file go_scanner, jalankan juga.
-Semua output dimasukkan ke file log.
-Fungsi main():
-def main():
-    parser = argparse.ArgumentParser(description="AWARE - Website Ransomware Scanner")
-    parser.add_argument("--scan", help="Target URL atau direktori lokal untuk dipindai")
-    args = parser.parse_args()
-Parsing argumen CLI.
+🧠 2. Pelacakan IP Penyerang (Trace Mode)
+Analisis log file (contohnya access.log, auth.log) untuk mendeteksi IP mencurigakan.
+Jika ada IP yang muncul lebih dari threshold (default 3 kali), akan ditandai sebagai attacker suspect.
 
-Saat dijalankan:
-python3 aware.py --scan https://target.com
-Jika tidak ada --scan, maka akan menampilkan bantuan.
+🔑 3. Ekstraksi Kunci Enkripsi
+Mendeteksi kemungkinan kata kunci enkripsi (AES, RSA, Key) dari:
+Website (--extract-key)
+Remote server via SSH (--ssh, --key, --remote-path)
+Berguna dalam tahap forensik untuk menyelidiki apakah ada kunci yang disisipkan oleh pelaku.
 
-🧪 Output Contoh
-Misalnya:
-$ python3 aware.py --scan https://example.com
+🐧 4. Analisis Remote via SSH
+Terhubung ke server jarak jauh menggunakan kunci privat RSA.
+Mengekstrak file .txt pada direktori target, lalu memindai kemungkinan kunci enkripsi.
+Sangat berguna untuk sistem yang telah dikompromi tetapi masih bisa diakses via SSH.
 
-[AWARE] Memulai pemindaian: https://example.com
-[AWARE] Menjalankan scanner C++...
-[AWARE] Menjalankan scanner Golang...
-[AWARE] Hasil disimpan di aware_reports/scan_20250715_123456.log
-🔐 Kenapa Ini Powerfull?
-Mendukung 3 bahasa: Python, C++, Go.
+📄 5. Laporan Otomatis (JSON Report)
+Hasil scan dan IP attacker otomatis disimpan ke file antiware_logs/report_<timestamp>.json.
+Format JSON ini memudahkan untuk digunakan dalam SIEM, dashboard, atau laporan keamanan.
+⚙️ Contoh Penggunaan
+🔸 Deteksi ransomware lokal:
+python3 dorware.py --scan /home/user/documents --type encrypting
+🔸 Cek MBR ransomware:
+python3 dorware.py --scan / --type mbr
+🔸 Ekstrak key dari URL:
+python3 dorware.py --extract-key https://example.com/restore.php
+🔸 Scan remote server via SSH:
+python3 dorware.py --ssh root@192.168.0.10 --key ~/.ssh/id_rsa --remote-path /var/www/html
+🔸 Analisis log untuk IP attacker:
+python3 dorware.py --trace --log /var/log/apache2/access.log
+🔒 Keamanan & Audit
+Tool ini tidak melakukan penyerangan, hanya pasif melakukan deteksi dan pelacakan.
+Cocok digunakan oleh:
+Cybersecurity analyst
+Incident response team
+Sysadmin forensik
+Bug hunter untuk menganalisis payload ransomware
 
-Fleksibel: Bisa deteksi ransomware real-time jika dipadukan dengan modul hash dan forensik.
+✅ Kegunaan suware.py secara umum:
+1. 🔐 Mendeteksi Infeksi Ransomware di Sistem Lokal
+Tool ini akan memindai direktori lokal yang Anda tentukan dan mendeteksi ransomware berdasarkan:
+Ekstensi file terenkripsi seperti .akira, .lockbit, .deadbolt
+File ransom note seperti akira_readme.txt, restore_files.html
+Sektor boot (MBR) yang dimodifikasi oleh ransomware seperti Petya/NotPetya
 
-Future-proof: Mudah dikembangkan, misalnya menambahkan:
---extract-key
---trace-attacker
---decrypt
-atau dashboard monitoring.
+2. 🕵️ Melacak IP Penyerang dari File Log
+Jika Anda mengaktifkan mode --trace, tool ini akan membaca file log (misalnya access.log atau ransom_note.txt) dan:
+Mengidentifikasi alamat IP yang muncul berkali-kali
+Membuat daftar tersangka (attacker suspects) berdasarkan intensitas IP muncul
 
-🚧 Catatan Penting
-Pastikan python3 sudah terinstal.
-Jalankan dengan sudo untuk mendeteksi sektor boot (/dev/sda).
-Untuk output maksimal, gunakan opsi --trace jika memiliki file log web server.
+3. 📄 Laporan Otomatis (JSON)
+Setelah proses selesai, tool akan membuat file laporan JSON yang berisi:
+Waktu scan
+File yang terdeteksi terkait ransomware
+Daftar IP penyerang
+Disimpan ke dalam direktori antiware_logs/
+
+🧠 Penjelasan Tiap Fungsi Penting:
+Fungsi	Deskripsi
+tampilkan_logo()	Menampilkan logo ASCII di terminal saat dijalankan, agar terlihat seperti tool profesional
+scan_encrypting(path)	Memindai direktori yang diberikan untuk mencari file terenkripsi dan ransom note
+scan_mbr()	Membaca sektor boot awal dari /dev/sda untuk mengecek apakah ada perubahan dari signature MBR standar
+scan_trace_logs(log_file)	Menganalisis file log untuk mencari IP penyerang berdasarkan frekuensi kemunculan
+generate_report(...)	Membuat file laporan hasil deteksi dalam format JSON untuk dokumentasi atau bukti forensik
+
+⚙️ Contoh Penggunaan:
+🔸 Scan ransomware di folder /home/user/data:
+python3 suware.py --scan /home/user/data --type encrypting
+🔸 Scan sektor MBR:
+python3 suware.py --scan / --type mbr
+🔸 Lacak IP penyerang dari file log:
+python3 suware.py --trace --log /var/log/apache2/access.log
+🔸 Jalankan semua fungsi deteksi:
+python3 suware.py --scan /home/user --type all --trace --log /var/log/syslog
+🎯 Target Pengguna:
+SysAdmin yang ingin mengecek sistem dari serangan ransomware.
+Tim forensik keamanan untuk investigasi pasca serangan.
+Peneliti malware atau bug hunter yang menganalisis jejak infeksi.
+User Linux lanjutan yang ingin mendeteksi anomali sistem.
+
 🧠 AWARE bukan sekadar scanner, tapi juga awal dari proses mitigasi dan pemulihan sistem akibat ransomware.
 
 
