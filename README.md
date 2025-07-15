@@ -4,6 +4,7 @@ AWARE adalah tool pendeteksi ransomware dan serangan siber berbasis web yang men
 #INSTALASI 
 git clone https://github.com/Mr-C0k1/aware.git
 cd aware
+pip install -r requirements.txt --break-system-pakages (jika terjadi eror di kali linux atau debian basic lainya) 
 python3 aware.py 
 
 ✅ Kegunaan dan Fungsi utama aware.py:
