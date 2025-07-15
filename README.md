@@ -123,11 +123,42 @@ python3 suware.py --scan / --type mbr
 python3 suware.py --trace --log /var/log/apache2/access.log
 🔸 Jalankan semua fungsi deteksi:
 python3 suware.py --scan /home/user --type all --trace --log /var/log/syslog
+
 🎯 Target Pengguna:
 SysAdmin yang ingin mengecek sistem dari serangan ransomware.
 Tim forensik keamanan untuk investigasi pasca serangan.
 Peneliti malware atau bug hunter yang menganalisis jejak infeksi.
 User Linux lanjutan yang ingin mendeteksi anomali sistem.
+
+
+✅ 1. Kompatibilitas Umum di Kali Linux
+Semua script pada dasarnya kompatibel dengan Kali Linux karena:
+Ditulis dalam Python 3 (#!/usr/bin/env python3)
+Menggunakan modul umum seperti: os, re, argparse, json, subprocess, requests, colorama, dan paramiko
+Kali Linux secara default sudah menyediakan banyak dependensi, namun tidak semuanya terinstal.
+
+⚠️ 2. Potensi Error dan Solusinya
+Modul/Fungsi	Risiko Error	Penyebab	Solusi
+colorama	ModuleNotFoundError	Belum terinstall	pip install colorama
+requests	ModuleNotFoundError	Belum terinstall	pip install requests
+paramiko (di aware.py & dorware.py)	ModuleNotFoundError	Belum terinstall	pip install paramiko
+PIL.Image (aware.py)	ImportError: No module named PIL	Pillow belum terpasang	pip install pillow
+Akses /dev/sda (suware.py & dorware.py)	PermissionError: [Errno 13] Permission denied	Membuka sektor disk butuh hak root	Jalankan dengan sudo
+ssh, cat, subprocess (dorware.py)	Error jika SSH atau file tidak tersedia	SSH key salah, direktori salah	Pastikan SSH key valid dan path benar
+File ransom note tidak ditemukan	File tidak ada di folder target	Tidak dianggap error, hanya hasil kosong	Lewati atau siapkan sample
+Jalur file antiware_logo.png (aware.py)	FileNotFoundError	Gambar tidak tersedia	Tambahkan gambar atau modifikasi kode
+os.walk(path)	Error jika path salah	Jalur folder tidak ada	Pastikan folder target benar
+
+📦 Saran: Install Semua Dependensi Sekali Jalan
+Jalankan perintah berikut di Kali Linux:
+sudo apt update
+sudo apt install python3-pip
+pip3 install colorama requests paramiko pillow
+💻 Akses Root untuk Fungsi Tertentu
+Beberapa bagian HARUS dijalankan sebagai root, seperti:
+Akses /dev/sda untuk scan MBR (suware.py)
+Mengakses direktori sistem (/var/log/, /etc, dll)
+Menjalankan subprocess SSH (remote command)
 
 🧠 AWARE bukan sekadar scanner, tapi juga awal dari proses mitigasi dan pemulihan sistem akibat ransomware.
 
