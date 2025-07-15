@@ -39,8 +39,10 @@ python3 antiware.py --log apache.log --trace
 
 #dorware scan 
 python3 dorware.py --scan https://example.com 
-
-
+python3 dorware.py --scan /home/user/docs
+python3 dorware.py --scan https://example.com
+python3 dorware.py --trace --log nginx-access.log
+python3 dorware.py --type mbr --scan /
 
 
 
